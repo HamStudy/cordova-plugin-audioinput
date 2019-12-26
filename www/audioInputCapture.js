@@ -370,17 +370,21 @@ audioinput._audioInputDebugEvent = function (debugMessage) {
  * @param {number[]} pcmData - Array of short integers which came from the plugin
  */
 function normalizeToTyped(pcmData) {
+    // Convert to float in a consistent manner
+    pcmData = pcmData.map(function(i) { return parseFloat(i); });
+    // If last value is NaN, remove it.
+    if (isNaN(pcmData[pcmData.length - 1])) {
+        pcmData.pop();
+    }
+    // Normalize if needed
     if (audioinput._cfg.normalize) {
         var out = Float32Array.from(pcmData, function(i) {
-            return parseFloat(i) / audioinput._cfg.normalizationFactor;
+            return i / audioinput._cfg.normalizationFactor;
         });
-        // If last value is NaN, remove it.
-        if (isNaN(out.subarray[out.length - 1])) {
-            return out.subarray(0, out.length - 1);
-        }
         return out;
     }
 
+    // If we're not normalizing then return the Int16Array
     return Int16Array.from(pcmData);
 }
 
